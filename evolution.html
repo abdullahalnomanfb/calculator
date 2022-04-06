@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+
+    <script src="https://unpkg.com/react@16.3.1/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@16.3.1/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/react-router-dom@5.0.0/umd/react-router-dom.min.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6.26.0/babel.js"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
+      crossorigin="anonymous"
+    />
+    <script src="https://unpkg.com/react@16/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
+      crossorigin="anonymous"
+    />
+
+    <!-- <link rel="stylesheet" href="./styles.css" /> -->
+    <style>
+      * {
+        padding: 0;
+        margin: 0;
+      }
+
+      #cpm_live_value .currency-convertor {
+        background: #c3c8ed;
+        border: 2px solid blue;
+      }
+      .input_design {
+        font-weight: 700;
+        font-size: 20px;
+        border: 1px solid black;
+        padding: 5px;
+        color: #be9d38;
+        text-align: center;
+      }
+      input[type="number"] {
+        padding: 5px;
+        text-align: center;
+      }
+      .amount {
+        font-size: 14px;
+        font-weight: 600;
+      }
+      div#cpm_evolution {
+        background: black;
+        color: white;
+        border: 2px solid #bf9000;
+        border-radius: 5px;
+      }
+      .coin_form.mb-5.m-auto.w-100.text-center p {
+        background: #bf8f00;
+        color: black;
+        padding: 4px 0px;
+      }
+
+      h4.pt-3 {
+        font-weight: 700;
+      }
+
+      h5 {
+        font-weight: bold;
+        font-size: 16px;
+        color: gray;
+      }
+
+      input[type="text"] {
+        border: 1px solid #bf9000;
+        padding: 4px 11px;
+        color: #be9d38;
+        font-weight: 700;
+        text-align: right;
+        font-size: 18px;
+        width: 260px;
+        margin-right: auto;
+      }
+
+      .amount-h {
+        margin-left: -9px;
+        background: white;
+        color: #be9d38;
+        padding: 9px 1px;
+        border-radius: 3px;
+        text-align: right;
+        padding-right: 17px;
+        font-weight: 700;
+        text-align: right;
+        font-size: 18px;
+        background-color: #757171;
+        width: 260px;
+        margin-right: auto;
+      }
+      .usd_cpm {
+        background: #757171;
+        width: 214px;
+        padding: 5px;
+        border-radius: 3px;
+        color: #0cb050;
+        margin: auto;
+      }
+      .proc {
+        font-weight: bold;
+        font-size: 20px;
+        color: gray;
+      }
+      @media only screen and (max-width: 770px) {
+        input.form-control {
+          width: 100%;
+        }
+        .amount-h {
+          width: 100%;
+        }
+        .amount-h {
+          margin-left: -6px;
+        }
+      }
+      .main {
+        font-weight: 700;
+      }
+      input[type="number"] {
+        font-weight: 700;
+        color: #2323ab;
+      }
+
+      .cpm_value {
+        width: 300px;
+        margin: auto;
+        color: #bf8f00;
+        font-family: ui-serif;
+        text-align: center;
+        padding: 0px 0px;
+        padding-top: 10px;
+        padding-bottom: 2px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script type="text/babel">
+      // React app
+      // import ConstructionRate from "./components/ConstructionRate";
+      //Construction
+      const { useState, useEffect } = React;
+
+      const LiveValue = () => {
+        const CPM_VALUE = 0.1356226;
+        const [formValue, setFormValue] = useState(0);
+        const [cpmIncrease, setCpmIncrease] = useState(1000);
+        const [newCpmIncrease, setNewCpmIncrease] = useState({
+          cpmBlance: 1000,
+          usdBlance: 100,
+        });
+
+        const [currentState, setCurrentState] = useState("");
+        const [currentAmount, setCurrentAmount] = useState(0);
+        // Crypto Value State
+        const [ETH, setETH] = useState(0);
+        const [BNB, setBNB] = useState(0);
+        const [BTC, setBTC] = useState(0);
+        const handleForm = (e) => {
+          setCurrentState(e.target.value);
+        };
+
+        // Todo: Fetch Data
+        useEffect(() => {
+          axios({
+            method: "get",
+            url: "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest",
+            headers: {
+              "X-CMC_PRO_API_KEY": "f836f93b-6ac2-4e0d-8010-ee59b9033da9",
+            },
+          }).then(function (res) {
+            res.data.data.forEach((item) => {
+              let price = item.quote.USD.price;
+              // Todo: if match ETH
+              if (item.symbol.toUpperCase() === "ETH") {
+                setETH(price);
+              }
+
+              // Todo: if match BNB
+              if (item.symbol.toUpperCase() === "BNB") {
+                setBNB(price);
+              }
+
+              // Todo: if match BTC
+              if (item.symbol.toUpperCase() === "BTC") {
+                setBTC(price);
+              }
+            });
+          });
+        }, [currentState]);
+
+        // Todo: Calculate Crypto Conversion
+        useEffect(() => {
+          // Check: if match CPM-ETH
+          if (currentState === "CPM-ETH") {
+            cpmToETH();
+          }
+
+          // Check: if match CPM-USD
+          if (currentState === "CPM-USD") {
+            cpmToUSD();
+          }
+
+          // Check: if match CPM-BNB
+          if (currentState === "CPM-BNB") {
+            cpmToBNB();
+          }
+
+          // Check: if match CPM-BTC
+          if (currentState === "CPM-BTC") {
+            cpmToBTC();
+          }
+
+          // Check: if match ETH-USD
+          if (currentState === "ETH-USD") {
+            ethToUSD();
+          }
+
+          // Check: if match ETH-CPM
+          if (currentState === "ETH-CPM") {
+            ethToCPM();
+          }
+
+          // Check: if match BTC-USD
+          if (currentState === "BTC-USD") {
+            btcToUSD();
+          }
+
+          // Check: if match BTC-CPM
+          if (currentState === "BTC-CPM") {
+            btcToCPM();
+          }
+        }, [currentState, formValue]);
+
+        // Todo: Big Data Calculate
+
+        // cpmToETH
+        function cpmToETH() {
+          let CPM_USD = CPM_VALUE * Number(formValue);
+          let GET_ETH_BY_ONE_USD = 1 / Number(ETH);
+          let result = CPM_USD * GET_ETH_BY_ONE_USD;
+          setCurrentAmount(result);
+        }
+
+        // cpmToUSD
+        function cpmToUSD() {
+          let result = CPM_VALUE * Number(formValue);
+          setCurrentAmount(result);
+        }
+
+        // cpmToBNB
+        function cpmToBNB() {
+          let CPM_USD = CPM_VALUE * Number(formValue);
+          let GET_BNB_BY_ONE_USD = 1 / Number(BNB);
+          let result = CPM_USD * GET_BNB_BY_ONE_USD;
+          setCurrentAmount(result);
+        }
+
+        // cpmToBTC
+        function cpmToBTC() {
+          let CPM_USD = CPM_VALUE * Number(formValue);
+          let GET_BTC_BY_ONE_USD = 1 / Number(BTC);
+          let result = CPM_USD * GET_BTC_BY_ONE_USD;
+          setCurrentAmount(result);
+        }
+
+        // ethToUSD
+        function ethToUSD() {
+          let result = ETH * Number(formValue);
+          setCurrentAmount(result);
+        }
+
+        // ethToCPM
+        function ethToCPM() {
+          let ETH_USD = ETH * Number(formValue);
+          let GET_CPM_BY_ONE_USD = 1 / Number(CPM_VALUE);
+          let result = ETH_USD * GET_CPM_BY_ONE_USD;
+          setCurrentAmount(result);
+        }
+
+        // btcToUSD
+        function btcToUSD() {
+          let result = BTC * Number(formValue);
+          setCurrentAmount(result);
+        }
+
+        // btcToCPM
+        function btcToCPM() {
+          let BTC_USD = BTC * Number(formValue);
+          let GET_CPM_BY_ONE_USD = 1 / Number(CPM_VALUE);
+          let result = BTC_USD * GET_CPM_BY_ONE_USD;
+          setCurrentAmount(result);
+        }
+
+        return (
+          <section
+            id="cpm_live_value"
+            style={{ maxWidth: "750px", margin: "auto" }}
+          >
+    
+            {/* ------------ISecond Part----------- */}
+
+            <div id="cpm_evolution" className="mb-5 mx-2">
+              <div className="container">
+                <div className="row ">
+                  <div className="coin_form mb-5 m-auto w-100 text-center px-5 ">
+                    <h4 className="pt-3" style={{ color: "#757171" }}>
+                      CPM Evolution
+                    </h4>
+                    <p>
+                      step 1:{" "}
+                      <span className="main">
+                        Your Current CPM Coin Balnace is :
+                      </span>
+                    </p>
+                    <div className="row">
+                      <div className="col-md-6">
+                        <h5>CPM Coin (CPM)</h5>
+                        <input
+                          type="text"
+                          name=""
+                          id=""
+                          value={cpmIncrease}
+                          onChange={(e) => setCpmIncrease(e.target.value)}
+                          className="form-control"
+                        />
+                      </div>
+                      <div className="col-md-6">
+                        <h5>American Dollar (USD)</h5>
+                        <h4 className="amount-h">
+                          $ {(cpmIncrease * 0.0678113).toFixed(2)}
+                        </h4>
+                      </div>
+                    </div>
+                    <div className="step-2 row mt-5">
+                      <p className="mt-2  px-2">
+                        step 2:{" "}
+                        <span className="main">
+                          Your New CPM Coin value if it increase at:
+                        </span>
+                      </p>
+                      <div className="row">
+                        <div className="col-md-6">
+                          <h5>Your CPM Balance</h5>
+                          <input
+                            type="text"
+                            name=""
+                            id=""
+                            className="form-control  "
+                            value={newCpmIncrease.cpmBlance}
+                            onChange={(e) =>
+                              setNewCpmIncrease({
+                                ...newCpmIncrease,
+                                cpmBlance: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                        <div className="col-md-6">
+                          <h5>CPM Increase at (USD) $:</h5>
+                          <input
+                            type="text"
+                            name=""
+                            id=""
+                            className="form-control "
+                            value={newCpmIncrease.usdBlance}
+                            onChange={(e) =>
+                              setNewCpmIncrease({
+                                ...newCpmIncrease,
+                                usdBlance: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="bottom text-center mb-3">
+                <div className="first">
+                  <h5 className="proc">Progression %</h5>
+                  <h4 className="usd_cpm">
+                    ${" "}
+                    {((newCpmIncrease.usdBlance / CPM_VALUE) * 100).toFixed(2)}{" "}
+                    %
+                  </h4>
+                </div>
+                <div className="second pt-4 pb-2">
+                  <h5 className="proc">New Balance USD</h5>
+                  <h4 className="usd_cpm">
+                    ${" "}
+                    {(
+                      newCpmIncrease.cpmBlance * newCpmIncrease.usdBlance
+                    ).toLocaleString("en-US")}
+                  </h4>
+                </div>
+              </div>
+            </div>
+          </section>
+        );
+      };
+
+      // APP
+      const App = () => (
+        <div className="container mt-4">
+          <LiveValue />
+        </div>
+      );
+
+      ReactDOM.render(<App />, document.querySelector("#root"));
+    </script>
+  </body>
+</html>
